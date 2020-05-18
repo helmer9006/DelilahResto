@@ -3,6 +3,8 @@ const api = express.Router();
 const controladorPlatos = require('../controladores/platos');
 const controladorUsuarios = require('../controladores/usuarios');
 const controladorPedidos = require('../controladores/pedidos')
+const controladorFormasdePago = require('../controladores/formasdepago');
+const controladorEstadosPedido = require('../controladores/estadospedido');
 
 const auth = require('../middelwares/auth');
 
@@ -25,5 +27,11 @@ api.post('/login', controladorUsuarios.login);
 api.get('/pedidos',auth.isAuth, controladorPedidos.getPedidos);
 
 
+//FORMAS DE PAGO
+api.get('/formasdepago', controladorFormasdePago.getFormasPago);
+
+//ESTADOS DE PEDIDOS
+
+api.get('/estadospedido', controladorEstadosPedido.getEstadosPedido);
 
 module.exports = api;
