@@ -125,35 +125,66 @@ function putUsuario(req, res) {
     const body = req.body;
     console.log(`/PUT api/usuarios - id Usuario  ${body.id}`)
 
-    if (req.usuario.id_perfil === 1) {   
-    sequelize.query('UPDATE usuarios SET  usuario = :usuario, nombre_completo = :nombre_completo, direccion = :direccion, correo = :correo, telefono = :telefono, clave = :clave, id_perfil = :id_perfil, estado = :estado where id = :id',
-        {
-            replacements: {
-                id: body.id,
-                usuario: body.usuario,
-                nombre_completo: body.nombre_completo,
-                direccion: body.direccion,
-                correo: body.correo,
-                telefono: body.telefono,
-                clave: body.clave,
-                id_perfil: body.id_perfil,
-                estado: body.estado
-            }
-        })
+    if (req.usuario.id_perfil === 1) {
+        sequelize.query('UPDATE usuarios SET  usuario = :usuario, nombre_completo = :nombre_completo, direccion = :direccion, correo = :correo, telefono = :telefono, clave = :clave, id_perfil = :id_perfil, estado = :estado where id = :id',
+            {
+                replacements: {
+                    id: body.id,
+                    usuario: body.usuario,
+                    nombre_completo: body.nombre_completo,
+                    direccion: body.direccion,
+                    correo: body.correo,
+                    telefono: body.telefono,
+                    clave: body.clave,
+                    id_perfil: body.id_perfil,
+                    estado: body.estado
+                }
+            })
 
-        .then(function (resultado) {
-            console.log("resul", resultado[0].affectedRows)
-            if (resultado[0].affectedRows > 0) {
-                res.status(200).json({ 'mensaje': 'El usuario se ha actualizado correctamente' })
-            } else {
-                res.status(404).json({ 'mensaje': 'No se ha modificado ningun registro' })
-            }
+            .then(function (resultado) {
+                console.log("resul", resultado[0].affectedRows)
+                if (resultado[0].affectedRows > 0) {
+                    res.status(200).json({ 'mensaje': 'El usuario se ha actualizado correctamente' })
+                } else {
+                    res.status(404).json({ 'mensaje': 'No se ha modificado ningun registro' })
+                }
 
-        }, function (err) {
-            return res.status(500).json({ 'mensaje': `Se ha producido un error  ${err}` });
-        });
-    }else{
-        
+            }, function (err) {
+                return res.status(500).json({ 'mensaje': `Se ha producido un error  ${err}` });
+            });
+    } else {
+        if (req.usuario.id == req.params.usuarioId) {
+
+            sequelize.query('UPDATE usuarios SET  usuario = :usuario, nombre_completo = :nombre_completo, direccion = :direccion, correo = :correo, telefono = :telefono, clave = :clave, id_perfil = :id_perfil, estado = :estado where id = :id',
+                {
+                    replacements: {
+                        id: body.id,
+                        usuario: body.usuario,
+                        nombre_completo: body.nombre_completo,
+                        direccion: body.direccion,
+                        correo: body.correo,
+                        telefono: body.telefono,
+                        clave: body.clave,
+                        id_perfil: body.id_perfil,
+                        estado: body.estado
+                    }
+                })
+
+                .then(function (resultado) {
+                    console.log("resul", resultado[0].affectedRows)
+                    if (resultado[0].affectedRows > 0) {
+                        res.status(200).json({ 'mensaje': 'El usuario se ha actualizado correctamente' })
+                    } else {
+                        res.status(404).json({ 'mensaje': 'No se ha modificado ningun registro' })
+                    }
+
+                }, function (err) {
+                    return res.status(500).json({ 'mensaje': `Se ha producido un error  ${err}` });
+                });
+
+        } else {
+            return res.status(403).json({ "mensaje": `No tienes permiso para modificar informacion de otros usuarios` })
+        }
     }
 }
 //ELIMINAR UN USUARIO POR PARAMETRO ID
@@ -161,20 +192,24 @@ function deleteUsuario(req, res) {
     let usuarioId = req.params.usuarioId;
     console.log(`DELETE /api/usuarios parametro - Id: ${usuarioId}`)
 
-    sequelize.query('DELETE FROM usuarios WHERE id=:id',
-        {
-            replacements: { id: usuarioId }
-        })
-        .then(function (resultados) {
-            console.log(resultados)
-            if (resultados[0].affectedRows > 0) {
-                res.status(200).json({ 'mensaje': 'El usuario ha sido eliminado correctamente.' })
-            } else {
-                res.status(404).json({ 'mensaje': 'No se encontro registro para eliminar' })
-            }
-        }, function (err) {
-            return res.status(500).json({ 'mensaje': `Se ha producido un error  ${err}` });
-        });
+    if (req.usuario.id_perfil === 1) {
+        sequelize.query('DELETE FROM usuarios WHERE id=:id',
+            {
+                replacements: { id: usuarioId }
+            })
+            .then(function (resultados) {
+                console.log(resultados)
+                if (resultados[0].affectedRows > 0) {
+                    res.status(200).json({ 'mensaje': 'El usuario ha sido eliminado correctamente.' })
+                } else {
+                    res.status(404).json({ 'mensaje': 'No se encontro registro para eliminar' })
+                }
+            }, function (err) {
+                return res.status(500).json({ 'mensaje': `Se ha producido un error  ${err}` });
+            });
+    } else {
+        return res.status(403).json({ "mensaje": `No tienes permiso para eliminar informacion de otros usuarios` })
+    }
 }
 
 //VALIDAR USUARIO - LOGIN - BODY - JSON

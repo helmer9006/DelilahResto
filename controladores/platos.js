@@ -27,7 +27,6 @@ function getPlatos(req, res) {
 function getPlato(req, res) {
     console.log('GET x ID /api/platos')
     console.log(req.params.platoId)
-
     const platoId = req.params.platoId;
     sequelize.query('SELECT * FROM platos where id = :id',
         {
