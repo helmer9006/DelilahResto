@@ -70,13 +70,7 @@ function getPedidos(req, res) {
                                 } else {
                                     for (let j of detalles) {
                                         // console.log(i)
-                                        Object.defineProperty(i, "productos", {
-                                            enumerable: false,
-                                            configurable: false,
-                                            writable: false,
-                                            value: 'static'
-                                            
-                                        })
+                                        Object.defineProperty(i, "productos",JSON.stringify(j) )
                                         console.log(i)
                                     }
                                     
