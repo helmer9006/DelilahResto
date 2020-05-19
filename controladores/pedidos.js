@@ -7,7 +7,6 @@ const sequelize = new Sequelize(`${config.db}`);
 
 //TRAER TODOS LOS PEDIDOS
 function getPedidos(req, res) {
-
     const pedidosArray = [
         //     {
         //     id: 1,
@@ -43,7 +42,7 @@ function getPedidos(req, res) {
 
         // }
     ];
-    const productosArray = []
+const productosArray = []
 
     console.log('GET /api/pedidos')
     // console.log(req.usuario)
@@ -57,7 +56,7 @@ function getPedidos(req, res) {
                 } else {
                     for (let i of pedidos) {
                         // console.log(i)
-                    
+
                         sequelize.query('SELECT * FROM detalles_pedidos where id_pedido = :id_pedido',
                             {
                                 replacements: { id_pedido: i.id },
@@ -70,23 +69,22 @@ function getPedidos(req, res) {
                                 } else {
                                     for (let j of detalles) {
                                         // console.log(i)
-                                        Object.defineProperty(i, "productos",JSON.stringify(j) )
-                                        console.log(i)
+                                        // Object.defineProperty(i, "productos", { value: j})
+                                      productosArray.push()
+                                        console.log('este es i ', i)
                                     }
                                     
                                 }
-                                
                             })
                             pedidosArray.push(i)
                     }
-                    
+
                     res.status(200).json(pedidosArray)
                 }
             }, function (err) {
                 return res.status(500).json({ 'mensaje': `Se ha producido un error  ${err}` });
             });
     } else {
-
         console.log('GET /api/pedidos')
         console.log(req.usuario)
         //solo permitir acceso a los pedidos propios

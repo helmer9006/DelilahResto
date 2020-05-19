@@ -75,7 +75,7 @@ function postPlato(req, res) {
         return res.status(403).json({ "mensaje": `No tienes permiso para crear un plato` })
     }
 }
-//MODIFICA UN PALTO X ID
+//MODIFICA UN PLATO X ID
 function putPlato(req, res) {
     let platoId = req.body.id;
     console.log(`PUT /api/platos - Id Plato: ${platoId}`)
