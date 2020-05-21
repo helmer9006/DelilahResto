@@ -218,9 +218,11 @@ function login(req, res) {
     console.log(`POST /api/login parametro - body - json: ${JSON.stringify(body)}`)
     console.log('clave ' + req.body.clave)
 
-    sequelize.query('SELECT * FROM usuarios where usuario = :usuario',
+    sequelize.query('SELECT * FROM usuarios where usuario = :usuario OR correo = :correo',
         {
-            replacements: { usuario: body.usuario },
+            replacements: { 
+            usuario: body.usuario,
+            correo: body.usuario },
             type: sequelize.QueryTypes.SELECT
         })
         .then(function (usuario) {

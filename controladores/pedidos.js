@@ -6,8 +6,10 @@ const config = require('../config');
 const sequelize = new Sequelize(`${config.db}`);
 
 //TRAER TODOS LOS PEDIDOS
+
 function getPedidos(req, res) {
-    const pedidosArray = [
+    let productosArray = [];
+    let pedidosArray = [
         //     {
         //     id: 1,
         //     id_usuario: 1,
@@ -42,65 +44,65 @@ function getPedidos(req, res) {
 
         // }
     ];
-const productosArray = []
+
 
     console.log('GET /api/pedidos')
     // console.log(req.usuario)
-    //validar si es administrador para traer todos los pedidos o no
+    //validar si es administrador para traer todos los pedidos o solo los del usuario en caso de serlo
     if (req.usuario.id_perfil === 1) {
         sequelize.query('SELECT * FROM pedidos',
             { type: sequelize.QueryTypes.SELECT })
             .then(function (pedidos) {
+
                 if (!pedidos.length) {
                     return res.status(404).json({ "message": `No existen pedidos` })
                 } else {
-                    for (let i of pedidos) {
-                        // console.log(i)
 
-                        sequelize.query('SELECT * FROM detalles_pedidos where id_pedido = :id_pedido',
-                            {
-                                replacements: { id_pedido: i.id },
-                                type: sequelize.QueryTypes.SELECT
-                            })
+                    sequelize.query('SELECT * FROM detalles_pedidos',
+                        {
+                            type: sequelize.QueryTypes.SELECT
+                        })
+                        .then(function (detalles) {
+                            for (let i of pedidos) {
+                                let det = detalles.filter(pedido => pedido.id_pedido == i.id);
+                                Object.assign(i, { productos: det })
+                                pedidosArray.push(i);
+                            }
+                            res.status(200).json(pedidosArray);
+                        })
 
-                            .then(function (detalles) {
-                                if (!detalles.length) {
-                                    return;
-                                } else {
-                                    for (let j of detalles) {
-                                        // console.log(i)
-                                        // Object.defineProperty(i, "productos", { value: j})
-                                      productosArray.push()
-                                        console.log('este es i ', i)
-                                    }
-                                    
-                                }
-                            })
-                            pedidosArray.push(i)
-                    }
-
-                    res.status(200).json(pedidosArray)
                 }
+
             }, function (err) {
                 return res.status(500).json({ 'mensaje': `Se ha producido un error  ${err}` });
             });
     } else {
-        console.log('GET /api/pedidos')
-        console.log(req.usuario)
-        //solo permitir acceso a los pedidos propios
-        sequelize.query('SELECT * FROM pedidos where id_usuario = :id_usuario',
+        sequelize.query('SELECT * FROM pedidos WHERE id_usuario = :id',
             {
-                replacements: { id_usuario: req.usuario.id },
+                replacements: { id: req.usuario.id },
                 type: sequelize.QueryTypes.SELECT
             })
             .then(function (pedidos) {
+
                 if (!pedidos.length) {
-                    return res.status(404).json({ "message": `No has realizado ningún pedio` })
+                    return res.status(404).json({ "message": `No tienen ningún pedido` })
                 } else {
 
-                    res.status(200).json(pedidos)
+                    sequelize.query('SELECT * FROM detalles_pedidos',
+                        {
+                            type: sequelize.QueryTypes.SELECT
+                        })
+                        .then(function (detalles) {
+                            for (let i of pedidos) {
+                                let det = detalles.filter(pedido => pedido.id_pedido == i.id);
+                                Object.assign(i, { productos: det })
+                                pedidosArray.push(i);
+                            }
+                            res.status(200).json(pedidosArray);
+                        })
 
                 }
+
             }, function (err) {
                 return res.status(500).json({ 'mensaje': `Se ha producido un error  ${err}` });
             });
