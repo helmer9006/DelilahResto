@@ -42,7 +42,7 @@ function getPedidos(req, res) {
 
         // }
     ];
-const productosArray = []
+    const productosArray = []
 
     console.log('GET /api/pedidos')
     // console.log(req.usuario)
@@ -65,9 +65,9 @@ const productosArray = []
 
                             .then(function (detalles) {
 
-                            Object.assign(i, )    
-                            pedidosArray.push(i);    
-                               
+                                Object.assign(i)
+                                pedidosArray.push(i);
+
                                 // if (!detalles.length) {
                                 //     return;
                                 // } else {
@@ -78,10 +78,10 @@ const productosArray = []
                                 //       productos.push(j)
                                 //       console.log("este es pedidosa rrya  \n",i)
                                 //     }
-                                    
+
                                 // }
                             })
-                            
+
                     }
 
                     res.status(200).json(pedidosArray)
@@ -113,7 +113,96 @@ const productosArray = []
     }
 }
 
+//CREAR NUEVO PEDIDO
+function postPedido(req, res) {
+    let banderDetalle = false;
+    console.log(`POST /api/pedidos  - ${req.body}`)
+    const body = req.body;
+    sequelize.query('INSERT INTO pedidos (id_usuario, id_forma_pago, valor_pedido, observacion, id_estado) values (:id_usuario, :id_forma_pago, :valor_pedido, :observacion, :id_estado)',
+        {
+            replacements: {
+                id_usuario: body.id_usuario,
+                id_forma_pago: body.id_forma_pago,
+                valor_pedido: body.valor_pedido,
+                observacion: body.observacion,
+                id_estado: 1
+            }
+        })
+
+        .then((pedido) => {
+            console.log(pedido[0]);
+            for (let i of body.productos) {
+
+                sequelize.query('INSERT INTO detalles_pedidos (id_pedido, id_plato, cantidad, impuesto, neto, total) values (:id_pedido, :id_plato, :cantidad, :impuesto, :neto, :total)',
+                    {
+                        replacements: {
+                            id_pedido: pedido[0],
+                            id_plato: i.id_plato,
+                            cantidad: i.cantidad,
+                            impuesto: i.impuesto,
+                            neto: i.neto,
+                            total: i.total
+                        }
+                    })
+                    .then((result) => {
+                        console.log('se han creado los detalles de los platos correctamente')
+                    }, (err) => {
+                        return res.status(500).json({ "mensaje": `Se ha producido un error  ${err}` })
+                    })
+
+            }
+            if (pedido[1] > 0) {
+                res.status(200).json({ 'mensaje': 'El pedido se ha creado correctamente' })
+            } else {
+                return res.status(500).json({ "mensaje": `Se ha producido un error` })
+            }
+        }, (err) => {
+            return res.status(500).json({ "mensaje": `Se ha producido un error  ${err}` })
+        })
+
+
+
+
+}
+
+//MODIFICAR PEDIDO - TABLA PEDIDOS
+function putPedidos(req, res) {
+    const body = req.body;
+    console.log(`/PUT api/pedidos - id Pedido  ${body.id}`)
+
+    if (req.usuario.id_perfil === 1) {
+        sequelize.query('UPDATE pedidos SET  id_usuario = :id_usuario, id_forma_pago = :id_forma_pago, valor_pedido = :valor_pedido, id_estado = :id_estado, observacion = :observacion, fecha_actualizacion = :fecha_actualizacion where id = :id',
+            {
+                replacements: {
+                    id: body.id,
+                    id_usuario: body.id_usuario,
+                    id_forma_pago: body.id_forma_pago,
+                    valor_pedido: body.valor_pedido,
+                    id_estado: body.id_estado,
+                    observacion: body.observacion,
+                    fecha_actualizacion: new Date()
+                }
+            })
+
+            .then(function (resultado) {
+                console.log("resul", resultado[0].affectedRows)
+                if (resultado[0].affectedRows > 0) {
+                    res.status(200).json({ 'mensaje': 'El pedido se ha actualizado correctamente' })
+                } else {
+                    res.status(404).json({ 'mensaje': 'No se ha modificado ningun pedido' })
+                }
+
+            }, function (err) {
+                return res.status(500).json({ 'mensaje': `Se ha producido un error  ${err}` });
+            });
+    } else {
+        return res.status(403).json({ "mensaje": `No tienes permiso para modificar pedidos` })
+    }
+}
+
 
 module.exports = {
-    getPedidos
+    getPedidos,
+    postPedido,
+    putPedidos
 }

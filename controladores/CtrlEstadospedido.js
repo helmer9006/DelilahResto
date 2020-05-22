@@ -1,5 +1,4 @@
 //*****************CONTROLADOR DE PEDIDOS********************
-const service = require('../servicios/index')
 const Sequelize = require('sequelize');
 const config = require('../config');
 
